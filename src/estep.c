@@ -68,6 +68,7 @@ static char *tum_plat = NULL;
 static float min_mut_prob = 0.8;
 static float min_snp_prob = 0.95;
 static float norm_contam = 0.1;
+static float tumour_contam = 0;
 static float ref_bias = 0.95;
 static float prior_mut_prob = 0.000006;
 static float prior_snp_prob = 0.0001;
@@ -102,6 +103,8 @@ void estep_print_usage (int exit_code){
 	printf("-c  --prior-mut-probability [float]              Prior somatic probability [default:%f]\n",prior_mut_prob);
 	printf("-d  --prior-snp-probability [float]              Prior germline mutant probability [default:%f]\n",prior_snp_prob);
 	printf("-k  --normal-contamination [float]               Normal contamination of tumour [default:%f]\n",norm_contam);
+	printf("-K  --acf-tumour [float]                         Aberrant cell fraction of tumour [default:%f]\n",1-norm_contam);
+	printf("-L  --acf-normal [float]                         Aberrant cell fraction of tumour [default:%f]\n",tumour_contam);
 	printf("-b  --reference-bias [float]                     Reference bias [default:%f]\n",ref_bias);
 	printf("-p  --mut-probability-cutoff [float]             Minimum probability call for a somatic mutant position to be output [default:%f]\n",min_mut_prob);
 	printf("-q  --snp-probability-cutoff [float]             Minimum probability call for a germline mutant position to be output [default:%f]\n",min_snp_prob);

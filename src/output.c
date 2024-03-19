@@ -188,10 +188,12 @@ error:
 
 char *output_generate_CaVEMan_process_log(char *cave_version){
 	char *process = malloc(sizeof(char) * 1000);
-	sprintf(process,"##%s=<%s=<.>,%s=<%s>,%s=<\"%s\">,%s=<NORMAL_CONTAMINATION=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n##cavemanVersion=%s\n",
+	float normal_acf=get_tumour_contam();
+	float tumour_acf=1-get_norm_contam();
+	sprintf(process,"##%s=<%s=<.>,%s=<%s>,%s=<\"%s\">,%s=<NORMAL_CONTAMINATION=%g,NORMAL_ACF=%g,TUMOUR_ACF=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n##cavemanVersion=%s\n",
 						VCF_PROCESSLOG_KEY,VCF_INPUTVCF_KEY,VCF_INPUTSOURCE_KEY,VCF_INPUT_SOURCE_VALUE,
 						VCF_INPUTVERSION_KEY,cave_version,
-						VCF_INPUTPARAMS_KEY,get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob(),
+						VCF_INPUTPARAMS_KEY,1-tumour_acf,normal_acf,tumour_acf,get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob(),
 						cave_version);
 	return process;
 }

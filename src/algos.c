@@ -79,6 +79,10 @@ float get_norm_contam(){
 	return norm_cont;
 }
 
+float get_tumour_contam(){
+	return tumour_cont;
+}
+
 float get_ref_bias(){
 	return ref_b;
 }
@@ -126,7 +130,11 @@ void set_min_snp_prob(float f){
 void set_norm_contam(float f){
 	norm_cont = f;
 }
-
+void set_tumour_contam(float fff){
+	//printf("`i'm in set_tumour_contam=%3.2f\n",fff);
+	tumour_cont = fff;
+	//printf("setting tc=%3.2f\n",fff);
+}
 void set_ref_bias(float f){
 	ref_b = f;
 }
@@ -269,52 +277,8 @@ long double algos_calculate_per_base_normal_contamination(uint8_t norm_copy_no, 
 	return per_base_norm;
 }
 
-int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double base_norm_contam){
-	//Normal read
-	if(read->normal==1){
-		//Calculate initial normal probabilities.
-		long double ref_base_prob = *(read->ref_base_probs[ref_base_idx]);
-		long double res = genos->ref_geno_norm_prob + ref_base_prob;
-		genos->ref_geno_norm_prob = res;
-        long double norm_var_base_prop;
-        long double nu_fx;
-        long double tmp_psi_var_prob_norm;
-        long double ans;
-		//iterate through from 0 to highest available of genos->hom_count, genos->het_norm_count,
-		int iter=0;
-		for(iter=0;iter<genos->norm_max;iter++){
-			//Hom snps
-
-			if(iter<genos->hom_count){
-				ans = genos->hom_snp_genotypes[iter]->prob + *(read->ref_base_probs[(genos->hom_snp_genotypes[iter]->norm_geno->var_base_idx)]);
-				genos->hom_snp_genotypes[iter]->prob = ans;
-			}//End of iteration through hom snps
-
-			//Het snps
-			if(iter<genos->het_norm_count){
-				norm_var_base_prop = genos->het_snp_norm_genotypes[iter]->norm_geno->var_base_prop;
-				nu_fx = (long double)ref_b * norm_var_base_prop;
-				tmp_psi_var_prob_norm = nu_fx / (nu_fx + ((long double)1 - norm_var_base_prop));
-				ans = genos->het_snp_norm_genotypes[iter]->prob + (long double)
-												(
-													Math_Log_flt64(
-														Math_Exp_flt64( (flt64_t)(ref_base_prob + Math_Log_flt64(
-                                                            (flt64_t)((long double)1 - tmp_psi_var_prob_norm)
-                                                            )
-                                                            ))
-															+
-														Math_Exp_flt64( 
-                                                            (flt64_t)(
-                                                                *(read->ref_base_probs[(genos->het_snp_norm_genotypes[iter]->norm_geno->var_base_idx)]) + Math_Log_flt64((flt64_t)tmp_psi_var_prob_norm) 
-                                                            )
-													    )
-                                                    )
-												);
-				genos->het_snp_norm_genotypes[iter]->prob = ans;
-			}//End of iteration through het snps
-		}
-
-	}else if(read->normal==0){//A tumour read
+void add_plog_for_acf(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double acf){
+		long double base_contam=1-acf;
 		long double ref_base_prob = *(read->ref_base_probs[ref_base_idx]);
 		long double res = genos->ref_geno_tum_prob + ref_base_prob;
 		genos->ref_geno_tum_prob = res;
@@ -326,7 +290,7 @@ int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int
 
 			if(iter<genos->somatic_count){
 				long double nu_xf = (long double)ref_b *  genos->somatic_genotypes[iter]->tum_geno->var_base_prop;
-				long double tmp_psi_var_prob = nu_xf * ((long double)1 - base_norm_contam) / (nu_xf + ((long double)1 - genos->somatic_genotypes[iter]->tum_geno->var_base_prop));
+				long double tmp_psi_var_prob = nu_xf * ((long double)1 - base_contam) / (nu_xf + ((long double)1 - genos->somatic_genotypes[iter]->tum_geno->var_base_prop));
 				//Calculate read component probability.
 				long double log_tmp_psi_var_prob = (long double) Math_Log_flt64((flt64_t)tmp_psi_var_prob);
 				long double log_1_minus_tmp_psi_var_prob = (long double) Math_Log_flt64((flt64_t)((long double)1 - tmp_psi_var_prob));
@@ -355,11 +319,11 @@ int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int
 				long double tmp_psi_var_prob_norm = nu_fx / (nu_fx + ((long double)1 - genos->het_snp_genotypes[iter]->norm_geno->var_base_prop));
 
 				long double nu_fx_two = (long double)ref_b * genos->het_snp_genotypes[iter]->tum_geno->var_base_prop;
-				long double tmp_psi_var_prob_tum = ((nu_fx_two * ((long double)1 - (long double)base_norm_contam))
+				long double tmp_psi_var_prob_tum = ((nu_fx_two * ((long double)1 - (long double)base_contam))
 															/
 														(nu_fx_two + ((long double)1 - genos->het_snp_genotypes[iter]->tum_geno->var_base_prop)))
 														+
-														( (long double)base_norm_contam * tmp_psi_var_prob_norm);
+														( (long double)base_contam * tmp_psi_var_prob_norm);
 				long double tum_res = genos->het_snp_genotypes[iter]->prob +
 												(
 													Math_Log_flt64(
@@ -373,11 +337,15 @@ int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int
 			}//End of het snps
 
 		}//End of iteration.
-
-
-
-	}//End of it this is normal or tumour read.
-	return 0;
+}
+int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double acf_normal,long double acf_tumour){
+	//Normal read
+	if(read->normal==1){
+              add_plog_for_acf(genos,read, ref_base_idx, acf_normal);
+       }else{
+              add_plog_for_acf(genos,read, ref_base_idx, acf_tumour);
+       }
+       return 0;
 }
 
 long double calculateLogSumExpNormFactor(estep_position_t *pos,long double norm_factor_max){
@@ -703,9 +671,21 @@ int algos_estep_read_position(alg_bean_t *alg,long double ********prob_arr, char
 						pos->tum_rev_cvg = genotype_init_genotype();
 						pos->total_cvg_norm = 0;
 						pos->total_cvg_tum = 0;
-
 						//Per base normal contamination value...
-						pos->base_norm_contam = algos_calculate_per_base_normal_contamination(pos->norm_cn,pos->tum_cn);
+						//pos->base_norm_contam = algos_calculate_per_base_normal_contamination(pos->norm_cn,pos->tum_cn);
+						//Per base normal contamination value...
+						//pos->base_norm_contam = algos_calculate_per_base_normal_contamination(pos->norm_cn,pos->tum_cn);
+						//nw14 Instead specify per base aberrant cell fraction of the normal and the tumour
+						long double acf_norm=(long double) tumour_cont;
+						long double acf_tumour=1-(long double) norm_cont;
+						//nw14:Note that the following sets the "true" tumour copy number. Appropriate when no CNA is present but wish to increase sensitivity
+						//by increasing number of considered somatic genotypes..
+						//int atcn=2;//Note atcn stand for actual tumour copy number: Use this to correctly explore subclonal variants.
+						int atcn=pos->tum_cn;//original mode
+						int ng=pos->norm_cn;
+						pos->acf_norm = acf_norm*atcn/((1-acf_norm)*ng+acf_norm*atcn);
+						pos->acf_tumour = acf_tumour*atcn/((1-acf_tumour)*ng+acf_tumour*atcn);
+						pos->base_norm_contam = 1-pos->acf_tumour;
 					}else{
 						pos->ref_base_idx = -1;
 						pos->norm_fwd_cvg = NULL;
@@ -758,7 +738,7 @@ int algos_estep_read_position(alg_bean_t *alg,long double ********prob_arr, char
 					}
 
 					//With all the indexes we need for now, and the genotypes calculated we can run the mathematical part...
-					algos_run_per_read_estep_maths(pos->genos,pos_t,pos->ref_base_idx,pos->base_norm_contam);
+					algos_run_per_read_estep_maths(pos->genos,pos_t,pos->ref_base_idx,pos->acf_norm,pos->acf_tumour);
 				}
 				//free(pos_t->lane);
 			}//end of iteration through reads.
