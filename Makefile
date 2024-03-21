@@ -1,4 +1,4 @@
-CAVEMAN_VERSION=1.15.3
+CAVEMAN_VERSION=1.15.3.TIN
 
 TEST_REF?=""
 #Compiler
@@ -23,7 +23,7 @@ OPTINC?=-I$(HTSLOC)/
 INCLUDES= -Isrc $(OPTINC) -rdynamic
 
 JOIN_INCLUDES= -I$(prefix)/include
-CAT_LFLAGS= -L$(prefix)/lib
+CAT_LFLAGS= -L$(prefix)/lib -L/nfs/casm/team273jn/nw14/projects/HYDROXY/TinCan/linasm/lib/
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify

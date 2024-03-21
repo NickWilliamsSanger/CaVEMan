@@ -347,7 +347,14 @@ char *test_output_header_to_file(){
 	sprintf(tmp,"##reference=%s\n",test_fai_out);
 	strcat(exp,tmp);
 	strcpy(tmp,"");
-	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
+
+	printf("%g,%g,%g,%g\n",get_norm_contam(),get_tumour_contam(),1.0-get_norm_contam(),get_ref_bias());
+	printf("%g\n",get_norm_contam());
+	printf("%g\n",get_tumour_contam());
+	printf("%g\n",1.0-get_norm_contam());
+	printf("%g\n",get_ref_bias());
+	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,NORMAL_ACF=%g,TUMOUR_ACF=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_tumour_contam(),1-get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
+	printf("OUTPU_TEST:%s\n",tmp);
 	strcat(exp,tmp);
 	sprintf(tmp,"##cavemanVersion=%s\n",CAVEMAN_VERSION);
 	strcat(exp,tmp);
@@ -428,7 +435,7 @@ char *test_output_header_to_file(){
 	sprintf(tmp,"##reference=%s\n",test_fai_out);
 	strcat(exp,tmp);
 	strcpy(tmp,"");
-	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
+	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,NORMAL_ACF=%g,TUMOUR_ACF=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_tumour_contam(),1-get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
 	strcat(exp,tmp);
 	sprintf(tmp,"##cavemanVersion=%s\n",CAVEMAN_VERSION);
 	strcat(exp,tmp);
@@ -513,7 +520,8 @@ char *test_output_header_to_file_cram(){
 	sprintf(tmp,"##reference=%s\n",test_fai_out);
 	strcat(exp,tmp);
 	strcpy(tmp,"");
-	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
+	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,NORMAL_ACF=%g,TUMOUR_ACF=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_tumour_contam(),1-get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
+	
 	strcat(exp,tmp);
 	sprintf(tmp,"##cavemanVersion=%s\n",CAVEMAN_VERSION);
 	strcat(exp,tmp);
@@ -594,7 +602,7 @@ char *test_output_header_to_file_cram(){
 	sprintf(tmp,"##reference=%s\n",test_fai_out);
 	strcat(exp,tmp);
 	strcpy(tmp,"");
-	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
+	sprintf(tmp, "##vcfProcessLog=<InputVCF=<.>,InputVCFSource=<CaVEMan>,InpuVCFVer=<\"%s\">,InputVCFParam=<NORMAL_CONTAMINATION=%g,NORMAL_ACF=%g,TUMOUR_ACF=%g,REF_BIAS=%g,PRIOR_MUT_RATE=%g,PRIOR_SNP_RATE=%g,SNP_CUTOFF=%g,MUT_CUTOFF=%g>>\n",CAVEMAN_VERSION,get_norm_contam(),get_tumour_contam(),1-get_norm_contam(),get_ref_bias(),get_prior_mut_prob(),get_prior_snp_prob(),get_min_snp_prob(),get_min_mut_prob());
 	strcat(exp,tmp);
 	sprintf(tmp,"##cavemanVersion=%s\n",CAVEMAN_VERSION);
 	strcat(exp,tmp);

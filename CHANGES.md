@@ -1,5 +1,9 @@
 # CHANGES
 
+## 1.15.3.TIN
+
+* Added support for tumour in normal
+
 ## 1.15.3
 
 * Remove requirement for CWD in config ini file

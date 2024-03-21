@@ -68,6 +68,7 @@ static char *tum_plat = NULL;
 static float min_mut_prob = 0.8;
 static float min_snp_prob = 0.95;
 static float norm_contam = 0.1;
+static float tmp=0.9;
 static float tumour_contam = 0;
 static float ref_bias = 0.95;
 static float prior_mut_prob = 0.000006;
@@ -287,15 +288,28 @@ int estep_setup_options(int argc, char *argv[]){
 
 			case 'y':
 				if(sscanf(optarg, "%i", &min_norm_cvg) != 1){
-      		sentinel("Error parsing -y argument '%s'. Should be an integer > 0",optarg);
-      	}
+      				sentinel("Error parsing -y argument '%s'. Should be an integer > 0",optarg);
+      			}
 				break;
 
 			case 'a':
 				if(sscanf(optarg, "%i", &split_size) != 1){
-      		sentinel("Error parsing -a argument '%s'. Should be an integer >= 0",optarg);
-      	}
+      				sentinel("Error parsing -a argument '%s'. Should be an integer >= 0",optarg);
+      			}
 				break;
+			case 'K':
+        		if(sscanf(optarg, "%f", &tmp) != 1){
+      		 		sentinel("Error parsing -K argument '%s'. Should be a float >= 0.0.",optarg);
+      			}
+      			norm_contam=1-tmp;
+      			break;
+      	
+      		case 'L':
+	    		if(sscanf(optarg, "%f", &tumour_contam) != 1){
+      				sentinel("Error parsing -k argument '%s'. Should be a float >= 0.0.",optarg);
+      			}
+     		 	break;
+
 
 			case 'S':
 				set_snp_warnings();

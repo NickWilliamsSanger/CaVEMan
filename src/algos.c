@@ -49,6 +49,7 @@
 float min_m_prob = 0.8;
 float min_s_prob = 0.95;
 float norm_cont = 0.1;
+float tumour_cont=0.0;
 float ref_b = 0.95;
 float prior_m_prob = 0.000006;
 float prior_s_prob = 0.0001;
@@ -131,9 +132,9 @@ void set_norm_contam(float f){
 	norm_cont = f;
 }
 void set_tumour_contam(float fff){
-	//printf("`i'm in set_tumour_contam=%3.2f\n",fff);
+	printf("`i'm in set_tumour_contam=%3.2f\n",fff);
 	tumour_cont = fff;
-	//printf("setting tc=%3.2f\n",fff);
+	printf("setting tc=%3.2f\n",fff);
 }
 void set_ref_bias(float f){
 	ref_b = f;
@@ -278,7 +279,7 @@ long double algos_calculate_per_base_normal_contamination(uint8_t norm_copy_no, 
 }
 
 void add_plog_for_acf(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double acf){
-		long double base_contam=1-acf;
+		long double base_contam=(long double) 1-acf;
 		long double ref_base_prob = *(read->ref_base_probs[ref_base_idx]);
 		long double res = genos->ref_geno_tum_prob + ref_base_prob;
 		genos->ref_geno_tum_prob = res;
@@ -294,7 +295,7 @@ void add_plog_for_acf(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_
 				//Calculate read component probability.
 				long double log_tmp_psi_var_prob = (long double) Math_Log_flt64((flt64_t)tmp_psi_var_prob);
 				long double log_1_minus_tmp_psi_var_prob = (long double) Math_Log_flt64((flt64_t)((long double)1 - tmp_psi_var_prob));
-				ans = genos->somatic_genotypes[iter]->prob + (long double)
+				long double increment=(long double)
 																	Math_Log_flt64(
 																		(
 																			Math_Exp_flt64( (flt64_t)((ref_base_prob + log_1_minus_tmp_psi_var_prob)) )
@@ -302,6 +303,8 @@ void add_plog_for_acf(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_
 																			Math_Exp_flt64( (flt64_t)((*(read->ref_base_probs[genos->somatic_genotypes[iter]->tum_geno->var_base_idx]) + log_tmp_psi_var_prob)) )
 																		)
 																	);
+				ans = genos->somatic_genotypes[iter]->prob + increment;
+				//printf("incremnt=%9.8Lf bc=%9.8Lf acf=%9.8Lf\n",increment,base_contam,tmp_psi_var_prob );
 				genos->somatic_genotypes[iter]->prob = ans;
 
 			}//End of somatics
@@ -336,13 +339,15 @@ void add_plog_for_acf(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_
 				genos->het_snp_genotypes[iter]->prob = tum_res;
 			}//End of het snps
 
+
+
 		}//End of iteration.
 }
 int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double acf_normal,long double acf_tumour){
 	//Normal read
 	if(read->normal==1){
               add_plog_for_acf(genos,read, ref_base_idx, acf_normal);
-       }else{
+       }else if(read->normal==0){//A tumour read
               add_plog_for_acf(genos,read, ref_base_idx, acf_tumour);
        }
        return 0;

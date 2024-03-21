@@ -48,8 +48,12 @@ typedef struct estep_position_t{
 	uint32_t total_cvg_tum;
 	uint32_t total_cvg_norm;
 	long double base_norm_contam;
+
 	long double total_snp_prob;
 	long double total_mut_prob;
+	long double acf_norm;
+	long double acf_tumour;
+
 	genotype_t *norm_fwd_cvg;
 	genotype_t *norm_rev_cvg;
 	genotype_t *tum_fwd_cvg;
@@ -67,13 +71,14 @@ int algos_estep_read_position(alg_bean_t *alg,long double ********prob_arr, char
 int algos_check_var_position_alleles(estep_position_t *pos, char *chr_name, char *type, uint8_t warnings);
 long double algos_calculate_per_base_normal_contamination(uint8_t norm_copy_no,uint8_t tum_copy_no);
 void finalise_probabilities_and_find_top_prob(estep_position_t *pos,long double norm_factor);
-int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double base_norm_contam);
+int algos_run_per_read_estep_maths(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double acf_normal,long double acf_tumour);
 void algos_run_per_position_estep_maths(estep_position_t *pos);
-
+void add_plog_for_acf(genotype_store_t *genos,read_pos_t *read, int8_t ref_base_idx, long double acf);
 void set_snp_warnings();
 void set_min_mut_prob(float f);
 void set_min_snp_prob(float f);
 void set_norm_contam(float f);
+void set_tumour_contam(float f);
 void set_ref_bias(float f);
 void set_prior_mut_prob(float f);
 void set_prior_snp_prob(float f);
@@ -88,6 +93,7 @@ void set_tumour_cn(int i);
 float get_min_mut_prob();
 float get_min_snp_prob();
 float get_norm_contam();
+float get_tumour_contam();
 float get_ref_bias();
 float get_prior_mut_prob();
 float get_prior_snp_prob();
