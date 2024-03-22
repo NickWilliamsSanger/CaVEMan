@@ -68,7 +68,6 @@ static char *tum_plat = NULL;
 static float min_mut_prob = 0.8;
 static float min_snp_prob = 0.95;
 static float norm_contam = 0.1;
-static float tmp=0.9;
 static float tumour_contam = 0;
 static float ref_bias = 0.95;
 static float prior_mut_prob = 0.000006;
@@ -138,6 +137,8 @@ int estep_setup_options(int argc, char *argv[]){
              	{"min-base-qual",required_argument , 0, 'm'},
              	{"index", required_argument, 0, 'i'},
              	{"normal-contamination", required_argument, 0, 'k'},
+             	{"acf-tumour", required_argument, 0, 'K'},
+             	{"acf-normal", required_argument, 0, 'L'},
              	{"prior-snp-probability", required_argument, 0, 'd'},
              	{"prior-mut-probability", required_argument, 0, 'c'},
              	{"reference-bias", required_argument, 0, 'b'},
@@ -164,9 +165,10 @@ int estep_setup_options(int argc, char *argv[]){
 
    int index = 0;
    int iarg = 0;
-
+   float tmp=-1;
+   float tmp2=-1;
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "x:y:c:d:p:q:b:k:a:f:i:o:g:m:n:t:v:w:l:M:P:T:r:sh",
+   while((iarg = getopt_long(argc, argv, "x:y:c:d:p:q:b:k:a:f:i:o:g:m:n:t:v:w:l:M:P:T:r:K:L:sh",
                             								long_opts, &index)) != -1){
    	switch(iarg){
    		case 'l':
@@ -244,78 +246,75 @@ int estep_setup_options(int argc, char *argv[]){
       	}
         break;
 
-			case 'k':
-				if(sscanf(optarg, "%f", &norm_contam) != 1){
+	  case 'k':
+		if(sscanf(optarg, "%f", &norm_contam) != 1){
       		sentinel("Error parsing -k argument '%s'. Should be a float >= 0.0.",optarg);
       	}
-				break;
+      	tmp2=norm_contam;
+		break;
 
-			case 'd':
-				if(sscanf(optarg, "%f", &prior_snp_prob) != 1){
+	 case 'd':
+		if(sscanf(optarg, "%f", &prior_snp_prob) != 1){
       		sentinel("Error parsing -d argument '%s'. Should be a float > 0.0.",optarg);
-      	}
-				break;
-
-			case 'c':
-				if(sscanf(optarg, "%f", &prior_mut_prob) != 1){
+      	}		
+		break;
+	 case 'c':
+		if(sscanf(optarg, "%f", &prior_mut_prob) != 1){
       		sentinel("Error parsing -c argument '%s'. Should be a float > 0.0.",optarg);
       	}
-				break;
+		break;
 
-			case 'b':
-				if(sscanf(optarg, "%f", &ref_bias) != 1){
+	 case 'b':
+		if(sscanf(optarg, "%f", &ref_bias) != 1){
       		sentinel("Error parsing -b argument '%s'. Should be a float >= 0.0.",optarg);
       	}
-				break;
+		break;
 
-			case 'p':
-				if(sscanf(optarg, "%f", &min_mut_prob) != 1){
+	 case 'p':
+		if(sscanf(optarg, "%f", &min_mut_prob) != 1){
       		sentinel("Error parsing -p argument '%s'. Should be a float >= 0.0.",optarg);
       	}
-				break;
+		break;
 
-			case 'q':
-				if(sscanf(optarg, "%f", &min_snp_prob) != 1){
+	case 'q':
+		if(sscanf(optarg, "%f", &min_snp_prob) != 1){
       		sentinel("Error parsing -q argument '%s'. Should be a float >= 0.0.",optarg);
       	}
-				break;
+		break;
 
-			case 'x':
-				if(sscanf(optarg, "%i", &min_tum_cvg) != 1){
+	case 'x':
+		if(sscanf(optarg, "%i", &min_tum_cvg) != 1){
       		sentinel("Error parsing -x argument '%s'. Should be an integer > 0",optarg);
       	}
-				break;
+		break;
 
-			case 'y':
-				if(sscanf(optarg, "%i", &min_norm_cvg) != 1){
-      				sentinel("Error parsing -y argument '%s'. Should be an integer > 0",optarg);
-      			}
-				break;
+	case 'y':
+		if(sscanf(optarg, "%i", &min_norm_cvg) != 1){
+      		sentinel("Error parsing -y argument '%s'. Should be an integer > 0",optarg);
+      	}
+		break;
 
-			case 'a':
-				if(sscanf(optarg, "%i", &split_size) != 1){
-      				sentinel("Error parsing -a argument '%s'. Should be an integer >= 0",optarg);
-      			}
-				break;
-			case 'K':
-        		if(sscanf(optarg, "%f", &tmp) != 1){
-      		 		sentinel("Error parsing -K argument '%s'. Should be a float >= 0.0.",optarg);
-      			}
-      			norm_contam=1-tmp;
-      			break;
-      	
-      		case 'L':
-	    		if(sscanf(optarg, "%f", &tumour_contam) != 1){
-      				sentinel("Error parsing -k argument '%s'. Should be a float >= 0.0.",optarg);
-      			}
-     		 	break;
+	case 'a':
+		if(sscanf(optarg, "%i", &split_size) != 1){
+      		sentinel("Error parsing -a argument '%s'. Should be an integer >= 0",optarg);
+      	}
+	    break;
+	case 'K':
+        if(sscanf(optarg, "%f", &tmp) != 1){
+      		 sentinel("Error parsing -K argument '%s'. Should be a float >= 0.0.",optarg);
+      	}
+      	norm_contam=1-tmp;
+      	break;
+    case 'L':
+	    if(sscanf(optarg, "%f", &tumour_contam) != 1){
+      			sentinel("Error parsing -k argument '%s'. Should be a float >= 0.0.",optarg);
+      	}
+     	break;
+	case 'S':
+		set_snp_warnings();
+		break;
 
-
-			case 'S':
-				set_snp_warnings();
-				break;
-
-			case '?':
+	case '?':
         estep_print_usage (1);
         break;
 
@@ -330,7 +329,15 @@ int estep_setup_options(int argc, char *argv[]){
    if(idx == 0){
    	estep_print_usage(1);
    }
-
+   //Check for consistency between normal-contamination and tumour-acf. 
+   if(tmp>0 && tmp2>0){
+	   if(fabs((1-tmp)-tmp2)>1e-3){
+		   printf("Inconsistent values for normal-contamination (%f) and tumour-acf (%f) supplied!\n",tmp2,tmp);
+		   exit(1);
+	   }
+   }
+   
+   printf("%8.7f %8.7f\n",norm_contam,tumour_contam);
    //Do some checking to ensure required arguments were passed and are accessible files
    if(check_exist(config_file) != 1){
    	printf("Config file %s does not appear to exist. Have you run previous caveman steps?\n",config_file);
@@ -438,6 +445,7 @@ int estep_main(int argc, char *argv[]){
 	set_min_mut_prob(min_mut_prob);
 	set_min_snp_prob(min_snp_prob);
 	set_norm_contam(norm_contam);
+	set_tumour_contam(tumour_contam);
 	set_ref_bias(ref_bias);
 	set_prior_mut_prob(prior_mut_prob);
  	set_prior_snp_prob(prior_snp_prob);
